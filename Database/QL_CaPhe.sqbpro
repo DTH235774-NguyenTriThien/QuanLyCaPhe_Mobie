@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="QL_CaPhe.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached><db schema="QL_CaPhe" path="D:\AGU\Dev_Course\AndroidProjects\Database\QL_CaPhe.db"/></attached><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2802"/><column_width id="4" width="0"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/><expanded_item id="4" parent="1"/><expanded_item id="0" parent="4"/></tab_structure><tab_browse><table title="BanAn" custom_title="0" dock_id="1" table="4,5:mainBanAn"/><dock_state state="000000ff00000000fd0000000100000002000002480000020cfc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000000002480000011e00ffffff000002480000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="BanAn" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="35"/><column index="2" value="48"/><column index="3" value="63"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1*">PRAGMA foreign_keys = ON;
+
+-- Bảng 1: NhanVien
+CREATE TABLE NhanVien (
+    MaNV TEXT PRIMARY KEY,
+    HoTen TEXT NOT NULL,
+    GioiTinh TEXT,
+    NgaySinh TEXT,
+    ChucVu TEXT,
+    LuongCoBan REAL,
+    TrangThai TEXT DEFAULT 'Đang làm'
+);
+
+-- Bảng 2: TaiKhoan
+CREATE TABLE TaiKhoan (
+    TenDangNhap TEXT PRIMARY KEY,
+    MatKhauHash TEXT NOT NULL,
+    Role TEXT NOT NULL,
+    MaNV TEXT,
+    FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE SET NULL
+);
+
+-- Bảng 3: CaLam
+CREATE TABLE CaLam (
+    MaCa INTEGER PRIMARY KEY,
+    TenCa TEXT NOT NULL,
+    GioBatDau TEXT NOT NULL,
+    GioKetThuc TEXT NOT NULL
+);
+
+-- Bảng 4: ChamCong
+CREATE TABLE ChamCong (
+    MaCham INTEGER PRIMARY KEY,
+    MaNV TEXT,
+    MaCa INTEGER,
+    NgayLam TEXT NOT NULL,
+    ClockIn TEXT,
+    ClockOut TEXT,
+    GhiChu TEXT,
+    FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE SET NULL,
+    FOREIGN KEY (MaCa) REFERENCES CaLam(MaCa) ON DELETE SET NULL
+);
+
+-- Bảng 5: BangLuong
+CREATE TABLE BangLuong (
+    MaLuong INTEGER PRIMARY KEY AUTOINCREMENT,
+    MaNV TEXT,
+    Thang INTEGER NOT NULL,
+    Nam INTEGER NOT NULL,
+    TongGio REAL,
+    LuongThucTe REAL,
+    TrangThai TEXT DEFAULT 'Chưa trả',
+    FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE SET NULL
+);
+
+-- Bảng 6: KhachHang
+CREATE TABLE KhachHang (
+    MaKH TEXT PRIMARY KEY,
+    TenKH TEXT NOT NULL,
+    SDT TEXT,
+    DiemTichLuy INTEGER DEFAULT 0
+);
+
+-- Bảng 7: NguyenLieu
+CREATE TABLE NguyenLieu (
+    MaNL TEXT PRIMARY KEY,
+    TenNL TEXT UNIQUE NOT NULL,
+    DonVi TEXT NOT NULL,
+    SoLuongTon REAL DEFAULT 0
+);
+
+-- Bảng 8: SanPham
+CREATE TABLE SanPham (
+    MaSP TEXT PRIMARY KEY,
+    TenSP TEXT NOT NULL,
+    LoaiSP TEXT,
+    DonGia REAL DEFAULT 0,
+    TrangThai TEXT DEFAULT 'Còn bán',
+    ImagePath TEXT
+);
+
+-- Bảng 9: CongThuc
+CREATE TABLE CongThuc (
+    MaSP TEXT NOT NULL,
+    MaNL TEXT NOT NULL,
+    SoLuong REAL NOT NULL,
+    PRIMARY KEY (MaSP, MaNL),
+    FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP) ON DELETE CASCADE,
+    FOREIGN KEY (MaNL) REFERENCES NguyenLieu(MaNL) ON DELETE CASCADE
+);
+
+-- Bảng 10: BanAn
+CREATE TABLE BanAn (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenBan TEXT DEFAULT 'Bàn Mới',
+    trangThai TEXT DEFAULT 'Trống'
+);
+
+-- Bảng 11: HoaDon
+CREATE TABLE HoaDon (
+    MaHD TEXT PRIMARY KEY,
+    NgayLap TEXT DEFAULT CURRENT_TIMESTAMP,
+    MaNV TEXT,
+    MaKH TEXT,
+    idBan INTEGER NOT NULL,
+    TongTien REAL,
+    GiamGia REAL,
+    ThanhTien REAL,
+    TrangThai TEXT DEFAULT 'Đã thanh toán',
+    DiemSuDung INTEGER,
+    GhiChu TEXT,
+    FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE SET NULL,
+    FOREIGN KEY (MaKH) REFERENCES KhachHang(MaKH) ON DELETE SET NULL,
+    FOREIGN KEY (idBan) REFERENCES BanAn(id)
+);
+
+-- Bảng 12: ChiTietHoaDon
+CREATE TABLE ChiTietHoaDon (
+    ChiTietID INTEGER PRIMARY KEY AUTOINCREMENT,
+    MaHD TEXT NOT NULL,
+    MaSP TEXT NOT NULL,
+    SoLuong INTEGER NOT NULL,
+    DonGia REAL NOT NULL,
+    ThanhTien REAL,
+    GhiChu TEXT,
+    FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
+    FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP)
+);
+
+-- Bảng 13: InventoryMovements
+CREATE TABLE InventoryMovements (
+    MovementID INTEGER PRIMARY KEY AUTOINCREMENT,
+    MaNL TEXT,
+    ChangeQty REAL NOT NULL,
+    MovementType TEXT,
+    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (MaNL) REFERENCES NguyenLieu(MaNL) ON DELETE SET NULL
+);</sql><current_tab id="0"/></tab_sql></sqlb_project>
