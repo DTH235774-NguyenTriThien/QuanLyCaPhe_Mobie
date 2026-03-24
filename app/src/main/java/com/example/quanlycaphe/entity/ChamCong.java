@@ -19,16 +19,12 @@ import androidx.room.PrimaryKey;
         }
 )
 public class ChamCong {
-
     @PrimaryKey
     public int MaCham;
-
     public String MaNV;
     public Integer MaCa;
     public String NgayLam;
-
     public String ClockIn;
     public String ClockOut;
-
     public String GhiChu;
 }
