@@ -10,9 +10,7 @@ public class KhachHang {
     @PrimaryKey
     @NonNull
     public String MaKH;
-
     public String TenKH;
     public String SDT;
-
     public int DiemTichLuy;
 }
